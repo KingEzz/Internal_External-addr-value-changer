@@ -33,6 +33,7 @@ namespace Memeory
 (Now, this can be modified to be used w/ External Processes Aswell!)
 
 -=-=- Retcheck -=-=-
+
 Alright Now That We Created The Function For The Value Change, Retcheck bypass would be similarly used by doing this. We First Need To Use This Inside a Lua C Function. 
 Lets See How We Do This;
 
@@ -60,7 +61,7 @@ This Can Also Be Used To Change Identity
 ```c++
 inline void ChangeIdentity(DWORD value)
 {
-	Memeory::ChangeAddrValue(identity, 5, false, false, NULL);
+	Memeory::ChangeAddrValue(identity, value, false, false, NULL);
 	return;
 }
 ```
