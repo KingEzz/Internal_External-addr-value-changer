@@ -1,3 +1,7 @@
+(I AM NOT A C++ GOD LIKE YOU ALL MAY THINK I AM, DONT ACUSE ME FOR MY CODE / HOW I CODE *cough cough everyone (Denality / Cyberhound*)
+
+So, We Need To Modify an Addresses Value, Lets Start By Creating The Function Itself.
+
 ```c++
 #define ShortProtect(addr, NEW_PROTECTION, OLD_PROTECTION)(VirtualProtect(addr, sizeof(int), NEW_PROTECTION, OLD_PROTECTION))
 
@@ -18,4 +22,25 @@ namespace Memeory // Namespace Creation
 	}
 };
 
+```
+
+Alright Now That We Created The Function For The Value Change, We Need To Use This Inside a Lua C Function. 
+Lets See How We Do This;
+
+```c++
+inline void getfield(DWORD luaState, int INDEX, const char *k)
+{
+	try
+	{
+		DWORD old;
+		Memeory::ChangeAddrValue(agetfield, 0xEB, false, false); // Changes The Jump
+		rgetfield(luaState, INDEX, k); // Calls Getfield
+		Memeory::ChangeAddrValue(agetfield, 0x72, false, false); // Changes Back The Value Or Memcheck Is Triggered
+		ShortProtect((LPVOID)agetfield, old, &old); // Changing Protection Back To Normal 
+	}
+	catch (exception error) // Exception Handling 
+	{
+		printf("LyonX Exception: %i\n", error);
+	}
+}
 ```
