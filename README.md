@@ -5,26 +5,35 @@ So, We Need To Modify an Addresses Value, Lets Start By Creating The Function It
 ```c++
 #define ShortProtect(addr, NEW_PROTECTION, OLD_PROTECTION)(VirtualProtect(addr, sizeof(int), NEW_PROTECTION, OLD_PROTECTION))
 
-namespace Memeory // Namespace Creation
+namespace Memeory
 {
-	void ChangeAddrValue(DWORD addr, DWORD newValue, bool change_back_perms, bool change_back_value) // Creating The Function
+	void ChangeAddrValue(DWORD addr, DWORD newValue, bool change_back_perms, bool change_back_value, LPCWSTR Process)
 	{
-		DWORD old; // Old Protection
-		DWORD past_value = 0; // Past Value
-		ReadProcessMemory(GetCurrentProcess(), (LPCVOID)addr, (LPVOID)past_value, sizeof(DWORD), 0); // Reads The Old Data
-		ShortProtect((LPVOID)addr, PAGE_EXECUTE_READWRITE, &old); // Modifies The Protection So We Can Write To It
-		*(BYTE*)addr = newValue; // Changes the Value Of The Addr
-		if (change_back_value == true) // Extra Shit
-			WriteProcessMemory(GetCurrentProcess(), (LPVOID)addr, (LPVOID)past_value, sizeof(DWORD), 0); // Changes Back Value
-		if (change_back_perms == true) // Extra Shit
-			ShortProtect((LPVOID)addr, old, &old); // Changes Back Protection
+		DWORD old;
+		DWORD past_value = 0;
+		DWORD pid;
+		if (Process == 0 || Process == NULL)
+			GetWindowThreadProcessId(FindWindow(NULL, (LPCWSTR)"Roblox"), &pid);
+		else
+			GetWindowThreadProcessId(FindWindow(NULL, Process), &pid);
+		ReadProcessMemory(OpenProcess(PROCESS_ALL_ACCESS,true, pid), (LPCVOID)addr, (LPVOID)past_value, sizeof(DWORD), 0);
+		ShortProtect((LPVOID)addr, PAGE_EXECUTE_READWRITE, &old);
+		*(BYTE*)addr = newValue;
+		if (change_back_value == true)
+			WriteProcessMemory(OpenProcess(PROCESS_ALL_ACCESS, true, pid), (LPVOID)addr, (LPVOID)past_value, sizeof(DWORD), 0);
+		if (change_back_perms == true)
+			ShortProtect((LPVOID)addr, old, &old);
 		return;
 	}
 };
 
+
 ```
 
-Alright Now That We Created The Function For The Value Change, We Need To Use This Inside a Lua C Function. 
+(Now, this can be modified to be used w/ External Processes Aswell!)
+
+-=-=- Retcheck -=-=-
+Alright Now That We Created The Function For The Value Change, Retcheck bypass would be similarly used by doing this. We First Need To Use This Inside a Lua C Function. 
 Lets See How We Do This;
 
 ```c++
@@ -33,19 +42,32 @@ inline void getfield(DWORD luaState, int INDEX, const char *k)
 	try
 	{
 		DWORD old;
-		Memeory::ChangeAddrValue(agetfield, 0xEB, false, false); // Changes The Jump
-		rgetfield(luaState, INDEX, k); // Calls Getfield
-		Memeory::ChangeAddrValue(agetfield, 0x72, false, false); // Changes Back The Value Or Memcheck Is Triggered
-		ShortProtect((LPVOID)agetfield, old, &old); // Changing Protection Back To Normal 
+		Memeory::ChangeAddrValue(agetfield, 0xEB, false, false, NULL);
+		rgetfield(luaState, INDEX, k);
+		Memeory::ChangeAddrValue(agetfield, 0x72, false, false, NULL);
+		ShortProtect((LPVOID)agetfield, old, &old);
 	}
-	catch (exception error) // Exception Handling 
+	catch (exception error)
 	{
-		printf("LyonX Exception: %i\n", error);
+		printf("LyonX Exception: 0x%i\n", error);
 	}
 }
 ```
 
-Now That Thats Done, You May Now Use Your EXPLOIT Bypassing Retcheck!
+Thats How To in theory bypass Retcheck.
+
+This Can Also Be Used To Change Identity
+```c++
+inline void ChangeIdentity(DWORD value)
+{
+	Memeory::ChangeAddrValue(identity, 5, false, false, NULL);
+	return;
+}
+```
+
+-=- External Haxx -=-
+Assault Cube:
+`
 
 Credits:
 - KingEzz (Creator / Coder)
