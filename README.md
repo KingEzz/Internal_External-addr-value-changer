@@ -44,3 +44,8 @@ inline void getfield(DWORD luaState, int INDEX, const char *k)
 	}
 }
 ```
+
+Now That Thats Done, You May Now Use Your EXPLOIT Bypassing Retcheck!
+
+Credits:
+- KingEzz (Creator / Coder)
